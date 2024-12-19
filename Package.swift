@@ -1,23 +1,26 @@
-// swift-tools-version: 5.10
-// The swift-tools-version declares the minimum version of Swift required to build this package.
-
+// swift-tools-version:5.10
 import PackageDescription
 
 let package = Package(
-    name: "PageControls",
+    name: "PageControlsForYou",
+    platforms: [
+        .iOS(.v13) // Specify minimum iOS version
+    ],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "PageControls",
-            targets: ["PageControls"]),
+            name: "PageControlsForYou",
+            targets: ["PageControlsForYou"]
+        ),
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "PageControls"),
+            name: "PageControlsForYou",
+            path: "Sources/PageControlsForYou" // Your main library code
+        ),
         .testTarget(
-            name: "PageControlsTests",
-            dependencies: ["PageControls"]),
+            name: "PageControlsForYouTests",
+            dependencies: ["PageControlsForYou"],
+            path: "Tests/PageControlsForYouTests"
+        ),
     ]
 )

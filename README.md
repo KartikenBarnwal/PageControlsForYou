@@ -46,4 +46,21 @@ pageControls.toCircle(index: 2)
 pageControl.nextCircle()
 pageControl.prevCircle()
 
+
+// setup the view programmatically - just need a wrapper UIView and its reference
+func setupPageControlsProgrammatically() {
+    let config = PageControlsForYouConfig(circleSize: 20, spacing: 10, totalCircles: items.count, circleBackground: .gray, selectedCircleBackground: .black)
+
+    pageControls?.translatesAutoresizingMaskIntoConstraints = false
+    pageControls = PageControlsForYou(frame: pageControlsWrapper.bounds, config: config)
+    pageControlsWrapper.addSubview(pageControls!)
+}
+
+// setup the view from a storyboard instance - just need a UIView now referenced to PageControlsForYou class of the module 
+func setupPageControlsFromStoryboard() {
+    let config = PageControlsForYouConfig(circleSize: 20, spacing: 10, totalCircles: items.count, circleBackground: .gray, selectedCircleBackground: .black)
+    
+    pageControlsView.configure(with: config)
+}
+
 ```

@@ -2,7 +2,9 @@
 PageControlsForYou is a customizable and lightweight library for adding infinite scrolling page controls to iOS apps.
 
 ## Demo
-![Demo](/Example/demo.gif)
+![Demo](/Assets/demo.gif)
+
+Watch out the repo `https://github.com/KartikenBarnwal/DemoPageControls` for demo
 
 ## Support Me
 

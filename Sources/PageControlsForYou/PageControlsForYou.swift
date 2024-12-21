@@ -1,13 +1,13 @@
 //
-//  InfinitePageControlsView.swift
-//  Infinite Page Controls
+//  PageControlsForYou.swift
+//  Page Controls For You
 //
 //  Created by Kartiken Barnwal on 14/12/24.
 //
 
 import UIKit
 
-/// Helps you define and customize the page controls at some level
+/// Helps you define and customize the page controls
 public struct PageControlsForYouConfig {
     public var circleSize: CGFloat
     public var spacing: CGFloat
@@ -16,6 +16,7 @@ public struct PageControlsForYouConfig {
     public var smallCircleRatio: CGFloat
     public var circleBackground: UIColor
     public var selectedCircleBackground: UIColor
+    public var simplyCircles: Bool
     
     public init(circleSize: CGFloat = 50,
                 spacing: CGFloat = 20,
@@ -23,19 +24,21 @@ public struct PageControlsForYouConfig {
                 visibleCircles: Int = 4,
                 smallCircleRatio: CGFloat = 0.5,
                 circleBackground: UIColor = .systemPink,
-                selectedCircleBackground: UIColor = .white
+                selectedCircleBackground: UIColor = .white,
+                simplyCircles: Bool = false
     ) {
         self.circleSize = circleSize
         self.spacing = spacing
         self.totalCircles = totalCircles
-        self.visibleCircles = visibleCircles
+        self.visibleCircles = (simplyCircles) ? totalCircles : visibleCircles
         self.smallCircleRatio = smallCircleRatio
         self.circleBackground = circleBackground
         self.selectedCircleBackground = selectedCircleBackground
+        self.simplyCircles = simplyCircles
     }
 }
 
-public class PageControlsForYouView: UIView {
+public class PageControlsForYou: UIView {
     
     enum States {
         case first
@@ -61,12 +64,16 @@ public class PageControlsForYouView: UIView {
         setup()
     }
 
-    func setup() {
+    private func setup() {
         
         let totalWidth = config.circleSize * CGFloat(config.visibleCircles) + config.spacing * CGFloat(config.visibleCircles - 1)
         
         var xOffset = (bounds.width - totalWidth) / 2
         let yOffset = (bounds.height - config.circleSize) / 2
+        
+        // Remove all the subviews
+        circles = []
+        subviews.forEach { $0.removeFromSuperview() }
         
         for i in 0..<config.visibleCircles {
             let circle = prepareCircleView()
@@ -78,11 +85,15 @@ public class PageControlsForYouView: UIView {
             xOffset += config.circleSize + config.spacing
         }
         
-        update(state: .first, index: 0)
+        if !config.simplyCircles {
+            update(state: .first, index: 0)
+        } else {
+            updateSimply(index: 0)
+        }
         
     }
     
-    func update(state: States, index: Int) {
+    private func update(state: States, index: Int) {
         
         switch state {
         case .first:
@@ -119,7 +130,18 @@ public class PageControlsForYouView: UIView {
         }
     }
     
-    /// asks the InfinitePageControls to move one step before (if it's valid)
+    private func updateSimply(index: Int) {
+        highlightACircle(index)
+    }
+    
+    /// Configure the PageControlsForYou with the given config if you are trying to do it from storyboard
+    public func configure(with config: PageControlsForYouConfig) {
+        
+        self.config = config
+        setup()
+    }
+    
+    /// asks the PageControlsForYou to move one step before (if it's valid)
     public func prevCircle() {
         lastIndex = currentIndex
         currentIndex -= 1
@@ -127,7 +149,7 @@ public class PageControlsForYouView: UIView {
         updateHelper()
     }
     
-    /// asks the InfinitePageControls to move one step after (if it's valid)
+    /// asks the PageControlsForYou to move one step after (if it's valid)
     public func nextCircle() {
         lastIndex = currentIndex
         currentIndex += 1
@@ -135,25 +157,36 @@ public class PageControlsForYouView: UIView {
         updateHelper()
     }
     
-    func updateHelper() {
-        var newState: States
-        
-        if currentIndex <= config.visibleCircles - 2 {
-            newState = .first
-            visibleIndex = currentIndex
-            update(state: newState, index: currentIndex)
-        } else if currentIndex >= (config.totalCircles - config.visibleCircles + 1) {
-            newState = .last
-            let tmpIndex = (currentIndex - (config.totalCircles - config.visibleCircles))
-            visibleIndex = tmpIndex
-            update(state: newState, index: tmpIndex)
+    /// asks the PageControlsForYou to move to a specific circle
+    public func toCircle(index: Int) {
+        lastIndex = currentIndex
+        currentIndex = index
+        updateHelper()
+    }
+    
+    private func updateHelper() {
+        if !config.simplyCircles {
+            var newState: States
+            
+            if currentIndex <= config.visibleCircles - 2 {
+                newState = .first
+                visibleIndex = currentIndex
+                update(state: newState, index: currentIndex)
+            } else if currentIndex >= (config.totalCircles - config.visibleCircles + 1) {
+                newState = .last
+                let tmpIndex = (currentIndex - (config.totalCircles - config.visibleCircles))
+                visibleIndex = tmpIndex
+                update(state: newState, index: tmpIndex)
+            } else {
+                newState = .middle
+                update(state: newState, index: config.visibleCircles - 2)
+            }
         } else {
-            newState = .middle
-            update(state: newState, index: config.visibleCircles - 2)
+            updateSimply(index: currentIndex)
         }
     }
     
-    func animateCircleBackward(_ index: Int) {
+    private func animateCircleBackward(_ index: Int) {
         circles[config.visibleCircles - 2].backgroundColor = config.circleBackground
         circles[config.visibleCircles - 1].backgroundColor = config.selectedCircleBackground
 
@@ -191,7 +224,7 @@ public class PageControlsForYouView: UIView {
         }
     }
     
-    func animateCircleForward(_ index: Int) {
+    private func animateCircleForward(_ index: Int) {
         circles[1].backgroundColor = config.circleBackground
         circles[0].backgroundColor = config.selectedCircleBackground
 
@@ -229,7 +262,7 @@ public class PageControlsForYouView: UIView {
         }
     }
     
-    func adjustCirclesSize(smallIndices: [Int]) {
+    private func adjustCirclesSize(smallIndices: [Int]) {
         for i in 0..<config.visibleCircles {
             if smallIndices.contains(i) {
                 circles[i].transform = CGAffineTransform(scaleX: config.smallCircleRatio, y: config.smallCircleRatio)
@@ -239,13 +272,13 @@ public class PageControlsForYouView: UIView {
         }
     }
     
-    func highlightACircle(_ index: Int) {
+    private func highlightACircle(_ index: Int) {
         for i in 0..<config.visibleCircles {
             circles[i].backgroundColor = (i == index) ? config.selectedCircleBackground : config.circleBackground
         }
     }
     
-    func prepareCircleView() -> UIView {
+    private func prepareCircleView() -> UIView {
         let circle = UIView()
         circle.backgroundColor = config.circleBackground
         circle.clipsToBounds = true
